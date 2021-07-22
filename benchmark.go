@@ -10,7 +10,7 @@ import (
 
 const (
 	// The range of values for n passed to the individual benchmarks
-	start, end, step int = 100000, 3000000, 100000
+	start, end, step int = 100000, 2000000, 200000
 )
 
 var (
@@ -39,8 +39,12 @@ func funcName(f func(int)) string {
 // runIterations executes the tests in a loop with the given parameters
 func runIterations(name string, start, end, step int, f func(int)) {
 	fmt.Print(name, ",")
+	var m runtime.MemStats
 	for i := start; i <= end; i += step {
+		runtime.GC()
 		f(i)
+		runtime.ReadMemStats(&m)
+		fmt.Printf("(%v)", m.Alloc)
 		fmt.Print(",")
 	}
 	fmt.Println()
@@ -50,11 +54,12 @@ func main() {
 	// first, print the CSV header with iteration counts
 	runIterations("iterations", start, end, step, iterations)
 
-	allFunctions := append(seanFunctions, zhenjlFunctions...)
-	allFunctions = append(allFunctions, mtchavezFunctions...)
-	allFunctions = append(allFunctions, huanduFunctions...)
-	allFunctions = append(allFunctions, colFunctions...)
-	allFunctions = append(allFunctions, ryszardFunctions...)
+	allFunctions := seanFunctions // append(abbyFunctions, zhenjlFunctions...)
+	// allFunctions = append(allFunctions, mtchavezFunctions...)
+	// allFunctions = append(allFunctions, huanduFunctions...)
+	// allFunctions = append(allFunctions, colFunctions...)
+	// allFunctions = append(allFunctions, ryszardFunctions...)
+	// allFunctions = append(allFunctions, seanFunctions...)
 
 	for _, f := range allFunctions {
 		runIterations(funcName(f), start, end, step, f)
